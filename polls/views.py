@@ -1,9 +1,10 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
 from .models import Choice, Question
 
 
@@ -28,9 +29,17 @@ class ResultsView(generic.DetailView):
     model = Question
     template_name = 'polls/results.html'
 
-
+# @login_required  <--- FIX BROKEN ACCESS CONTROL
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
+
+    # BROKEN ACCESS CONTROL Flaw
+    # ---------------------------------------
+    login_status = request.POST.get('user_logged_in', 'false')
+
+    if login_status != 'true':
+        return HttpResponse("Error: Only users that are logged in can vote!")
+    # ---------------------------------------
     try:
         selected_choice = question.choice_set.get(pk=request.POST['choice'])
     except (KeyError, Choice.DoesNotExist):

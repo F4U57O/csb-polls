@@ -6,7 +6,9 @@
   </head>
   <body>
     <h1>Sign in to Polls</h1>
-    {% if form.errors %}
+    {% if request.GET.next %}
+    <p style="color: red; font-weight: bold">You need to sign in to vote</p>
+    {% endif %} {% if form.errors %}
     <p style="color: red">Username or password is wrong</p>
     {% endif %}
 
