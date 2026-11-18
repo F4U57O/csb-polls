@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Polls app: Cyber Security</title>
+  </head>
+  <body>
+    <p>This application demonstrates 5 security vulnerabilities.</p>
+    <ul>
+      {% if user.is_authenticated %}
+      <li>User <strong>{{ user.username }}</strong> signed in</li>
+      <li><a href="{% url 'polls:index' %}">Go to Polls list</a></li>
+      <li>
+        <form action="{% url 'logout' %}" method="post" style="display: inline">
+          {% csrf_token %}
+          <button type="submit">Sign out</button>
+        </form>
+        "
+      </li>
+      {% else %}
+      <li><a href="{% url 'login' %}">Sign In</a></li>
+      <li><a href="{% url 'polls:register' %}">Register new account</a></li>
+      <li><a href="{% url 'polls:index' %}">View Polls</a></li>
+      {% endif %}
+    </ul>
+  </body>
+</html>

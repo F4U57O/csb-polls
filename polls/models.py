@@ -1,9 +1,16 @@
 import datetime
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
 
 
 class Question(models.Model):
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     question_text = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date published')
     
