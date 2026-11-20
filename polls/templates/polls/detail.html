@@ -16,7 +16,11 @@
 
 <form action="{% url 'polls:vote' question.id %}" method="post">
   {% csrf_token %}
-  <input type="hidden" name="user_logged_in" value="false" />
+  <input
+    type="hidden"
+    name="user_logged_in"
+    value="{% if user.is_authenticated %}true{% else %}false{% endif %}"
+  />
   {% for choice in question.choice_set.all %}
   <input
     type="radio"

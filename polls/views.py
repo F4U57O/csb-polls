@@ -6,6 +6,8 @@ from django.utils import timezone
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from .models import Choice, Question
+from django.http import HttpResponse
+from django.utils.html import escape
 
 
 class IndexView(generic.ListView):
@@ -35,10 +37,10 @@ def vote(request, question_id):
 
     # BROKEN ACCESS CONTROL Flaw
     # ---------------------------------------
-    login_status = request.POST.get('user_logged_in', 'false')
+    login_status = request.POST.get('user_logged_in', 'false')  # <-- Comment this out
 
-    if login_status != 'true':
-        return HttpResponse("Error: Only users that are logged in can vote!")
+    if login_status != 'true': # <-- Comment this out
+        return HttpResponse("Error: Only users that are logged in can vote!") # <-- Comment this out
     # ---------------------------------------
     try:
         selected_choice = question.choice_set.get(pk=request.POST['choice'])
@@ -62,4 +64,41 @@ def register(request):
         form = UserCreationForm()
 
     return render(request, 'registration/register.html', {'form': form})
+
+def search(request):
+    query = request.GET.get("q", "").strip()
+
+    form_html = f"""
+    <form method="get" action="">
+        <label for="q">Search Questions:</label>
+        <input type="text" id="q" name="q" value="{escape(query)}" placeholder="Search">
+        <button type="submit">Search</button>
+        </form>
+        <hr>
+        """
+
+
+    if query:
+        # <---------- Injection FLAW
+        sql = f"SELECT * FROM polls_question WHERE question_text LIKE '%{query}%'"
+        questions = list(Question.objects.raw(sql))
+        # -------------------------- ' UNION SELECT id, secret_token, NULL, NULL, NULL FROM polls_question --
+        
+        # ------------ Injection FIX
+        # sql = "SELECT * FROM polls_question WHERE question_text LIKE %s"
+        # questions = list(Question.objects.raw(sql, [f"%{query}%"]))
+        # -----------------------------------------------------------------
+        heading = "<h2>Search results:</h2>"
+    else:
+        questions = list(Question.objects.order_by("-pub_date")[:5])
+        heading = "<h2> Latest questions:</h2>"
+
+    if questions:
+        items = "".join(f'<li><a href="{reverse("polls:detail", args=(q.id,))}">{escape(q.question_text)}</a></li>' for q in questions )
+
+        list_html = f"<ul>{items}</ul>"
+    else:
+        list_html = "<p>Questions not found</p>"
+
+    return HttpResponse(form_html + heading + list_html)
     
