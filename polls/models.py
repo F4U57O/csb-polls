@@ -2,6 +2,7 @@ import datetime
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
+from django.contrib.auth.hashers import make_password
 
 
 class Question(models.Model):
@@ -13,6 +14,19 @@ class Question(models.Model):
     )
     question_text = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date published')
+
+    # ------------------------------------
+
+    secret_token = models.CharField(max_length=255, blank= True, null=True, verbose_name="Secret token")
+    
+    def save(self, *args, **kwargs):
+        
+        #if self.secret_token:
+        #    self.secret_token = make_password(self.secret_token)
+        
+        super().save(*args, **kwargs)
+
+    # ------------------------------------
     
     def __str__(self):
         return self.question_text
