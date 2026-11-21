@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Choice, Question
 from django.http import HttpResponse
 from django.utils.html import escape
+from django.contrib.auth.models import User
 
 
 class IndexView(generic.ListView):
@@ -30,6 +31,10 @@ class DetailView(generic.DetailView):
 class ResultsView(generic.DetailView):
     model = Question
     template_name = 'polls/results.html'
+
+class RegisterForm(UserCreationForm):
+    usable_password = None
+
 
 # @login_required  <--- FIX BROKEN ACCESS CONTROL
 def vote(request, question_id):
@@ -55,15 +60,30 @@ def vote(request, question_id):
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
 
 def register(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
+    # ----------------------------Identification And Authentication Failure FLAW 
+    
+    if request.method == 'POST': 
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password1", "")
+        if username and password and not User.objects.filter(username=username).exists():
+            User.objects.create_user(username=username, password=password)
             return redirect('login')
-    else:
-        form = UserCreationForm()
 
-    return render(request, 'registration/register.html', {'form': form})
+    return render(request, 'registration/register.html', {'form': RegisterForm()})
+    # ----------------------------
+
+    # ----------------------------Identification And Authentication Failure FIX
+    #if request.method == 'POST':
+    #    form = RegisterForm(request.POST)
+    #    if form.is_valid():
+    #        form.save()
+    #        return redirect('login')
+    #else:
+    #    form = RegisterForm()
+     
+    
+    #return render(request, 'registration/register.html', {'form': form})
+    # -----------------------------
 
 def search(request):
     query = request.GET.get("q", "").strip()
