@@ -15,14 +15,14 @@ class Question(models.Model):
     question_text = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date published')
 
-    # ------------------------------------
+    # ------------------------------------ Cryptographic Failure FLAW
 
     secret_token = models.CharField(max_length=255, blank= True, null=True, verbose_name="Secret token")
     
     def save(self, *args, **kwargs):
         
-        #if self.secret_token:
-        #    self.secret_token = make_password(self.secret_token)
+        #if self.secret_token:            # Cryptographic Failure FIX
+        #    self.secret_token = make_password(self.secret_token)   # FIX
         
         super().save(*args, **kwargs)
 

@@ -9,7 +9,9 @@ from .models import Choice, Question
 from django.http import HttpResponse
 from django.utils.html import escape
 from django.contrib.auth.models import User
+import logging
 
+logger = logging.getLogger(__name__)
 
 class IndexView(generic.ListView):
     template_name = 'polls/index.html'
@@ -76,14 +78,21 @@ def register(request):
     #if request.method == 'POST':
     #    form = RegisterForm(request.POST)
     #    if form.is_valid():
-    #        form.save()
+    #        user = form.save()
+            # ------------------------Security Logging And Monitoring Failure FIX
+            #logger.warning("New user registered (username=%s)", user.username)
+            # ------------------------------------------------------------------ SLAMF
     #        return redirect('login')
-    #else:
-    #    form = RegisterForm()
-     
+    #    else:
+            # ------------------------Security Logging And Monitoring Failure FIX
+            #failed_username = request.POST.get("username", "").strip()
+            #logger.warning("Failed registration for (username=%s)", failed_username)
+            # ------------------------------------------------------------------ SLAMF
+    #        return render(request, "registration/register.html", {'form': form})
     
+    #form = RegisterForm()
     #return render(request, 'registration/register.html', {'form': form})
-    # -----------------------------
+    # ----------------------------- IAAF
 
 def search(request):
     query = request.GET.get("q", "").strip()
